@@ -5,24 +5,24 @@ export const getAllContacts = async (_req, res, next) => {
   try {
     const contacts = await contactsService.listContacts();
     res.status(200).json(contacts);
-  } catch (er) {
-    console.log(er);
+  } catch (error) {
+    console.log(error);
     next(new HttpError(500));
   }
 };
 
-export const getOneContact = async (req, res, next) => {
+export const getOneContact = async (req, res) => {
   try {
     const { id } = req.params;
     const contact = await contactsService.getContactById(id);
     if (contact) {
       res.status(200).json(contact);
     } else {
-      next(new HttpError(404));
+      throw HttpError(404);
     }
-  } catch (er) {
-    console.log(er);
-    next(new HttpError(500));
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
 };
 
