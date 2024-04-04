@@ -35,7 +35,7 @@ export const deleteContact = async (req, res, next) => {
   try {
     const { id } = req.params;
     const deletedContact = await contactsService.removeContact(id);
-    if (!deleteContact) {
+    if (!deletedContact) {
       throw HttpError(404);
     }
     res.status(200).json(deletedContact);
