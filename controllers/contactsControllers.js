@@ -1,9 +1,6 @@
+import { Types } from "mongoose";
 import HttpError from "../helpers/HttpError.js";
-// import {
-//   createContactSchema,
-//   updateContactSchema,
-// } from "../schemas/contactsSchemas.js";
-// import { json } from "express";
+
 import { Contact } from "../models/contactModel.js";
 
 export const getAllContacts = async (_req, res, next) => {
@@ -19,12 +16,11 @@ export const getAllContacts = async (_req, res, next) => {
 export const getOneContact = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const idIsValid = Types.ObjectId.isValid(id);
+    if (!idIsValid) throw HttpError(404);
     const contact = await Contact.findById(id);
-    if (contact) {
-      res.status(200).json(contact);
-    } else {
-      throw HttpError(404);
-    }
+    if (!contact) throw HttpError(404);
+    res.status(200).json(contact);
   } catch (error) {
     console.log(error);
     next(error);
@@ -46,9 +42,9 @@ export const deleteContact = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const { name, email, phone } = req.body;
+    const { name, email, phone, favorite } = req.body;
 
-    const newContact = await Contact.create({ name, email, phone });
+    const newContact = await Contact.create({ name, email, phone, favorite });
     res.status(201).json(newContact);
   } catch (error) {
     next(error);
@@ -57,8 +53,8 @@ export const createContact = async (req, res, next) => {
 
 export const updateContact = async (req, res, next) => {
   try {
-    const { name, email, phone } = req.body;
-    if (!name || !email || !phone) {
+    const { name, email, phone, favorite } = req.body;
+    if (!name || !email || !phone || !favorite) {
       return res
         .status(400)
         .json({ message: "Body must have at least one field" });
@@ -72,5 +68,25 @@ export const updateContact = async (req, res, next) => {
     res.status(200).json(updateContact);
   } catch (error) {
     next(error);
+  }
+};
+
+export const updateStatusContact = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const idIsValid = Types.ObjectId.isValid(id);
+    if (!idIsValid) throw HttpError(404);
+    const { favorite } = req.body;
+    const updatedContact = await Contact.findByIdAndUpdate(
+      id,
+      { favorite },
+      { new: true }
+    );
+    if (!updatedContact) {
+      throw HttpError(404);
+    }
+    res.status(200).json(updatedContact);
+  } catch (er) {
+    next(er);
   }
 };
