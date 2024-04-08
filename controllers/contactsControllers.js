@@ -43,7 +43,9 @@ export const deleteContact = async (req, res, next) => {
 export const createContact = async (req, res, next) => {
   try {
     const { name, email, phone, favorite } = req.body;
-
+    if (!name || !email || !phone || !favorite) {
+      throw HttpError(400);
+    }
     const newContact = await Contact.create({ name, email, phone, favorite });
     res.status(201).json(newContact);
   } catch (error) {
@@ -53,14 +55,15 @@ export const createContact = async (req, res, next) => {
 
 export const updateContact = async (req, res, next) => {
   try {
-    const { name, email, phone, favorite } = req.body;
-    if (!name || !email || !phone || !favorite) {
+    const { id } = req.params;
+    const idIsValid = Types.ObjectId.isValid(id);
+    if (!idIsValid) throw HttpError(404);
+    const { name, email, phone } = req.body;
+    if (!name || !email || !phone) {
       return res
         .status(400)
         .json({ message: "Body must have at least one field" });
     }
-
-    const { id } = req.params;
     const updateContact = await Contact.findByIdAndUpdate(id, req.body);
     if (!updateContact) {
       throw HttpError(404);
@@ -77,6 +80,11 @@ export const updateStatusContact = async (req, res, next) => {
     const idIsValid = Types.ObjectId.isValid(id);
     if (!idIsValid) throw HttpError(404);
     const { favorite } = req.body;
+    if (!favorite) {
+      return res
+        .status(400)
+        .json({ message: "Body must have at least one field" });
+    }
     const updatedContact = await Contact.findByIdAndUpdate(
       id,
       { favorite },
