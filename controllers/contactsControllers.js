@@ -42,11 +42,13 @@ export const deleteContact = async (req, res, next) => {
 
 export const createContact = async (req, res, next) => {
   try {
-    const { name, email, phone, favorite } = req.body;
-    if (!name || !email || !phone || !favorite) {
-      throw HttpError(400);
+    const { name, email, phone } = req.body;
+    if (!name || !email || !phone) {
+      const error = new Error("Bad Request: Missing required fields");
+      error.status = 400;
+      throw error;
     }
-    const newContact = await Contact.create({ name, email, phone, favorite });
+    const newContact = await Contact.create({ name, email, phone });
     res.status(201).json(newContact);
   } catch (error) {
     next(error);
