@@ -3,9 +3,9 @@ import HttpError from "../helpers/HttpError.js";
 
 import { Contact } from "../models/contactModel.js";
 
-export const getAllContacts = async (_req, res, next) => {
+export const getAllContacts = async (req, res, next) => {
   try {
-    const contacts = await Contact.find();
+    const contacts = await Contact.find({ owner: req.user._id });
     res.status(200).json(contacts);
   } catch (error) {
     console.log(error);
