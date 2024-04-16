@@ -18,8 +18,10 @@ export const getOneContact = async (req, res, next) => {
     const { id } = req.params;
     const idIsValid = Types.ObjectId.isValid(id);
     if (!idIsValid) throw HttpError(404);
-    const contact = await Contact.findById(id);
+
+    const contact = await Contact.findOne({ _id: id, owner: req.user._id });
     if (!contact) throw HttpError(404);
+
     res.status(200).json(contact);
   } catch (error) {
     console.log(error);
@@ -30,7 +32,10 @@ export const getOneContact = async (req, res, next) => {
 export const deleteContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const deletedContact = await Contact.findByIdAndDelete(id);
+    const deletedContact = await Contact.findOneAndDelete({
+      _id: id,
+      owner: req.user._id,
+    });
     if (!deletedContact) {
       throw HttpError(404);
     }
@@ -48,7 +53,12 @@ export const createContact = async (req, res, next) => {
       error.status = 400;
       throw error;
     }
-    const newContact = await Contact.create({ name, email, phone });
+    const newContact = await Contact.create({
+      name,
+      email,
+      phone,
+      owner: req.user._id,
+    });
     res.status(201).json(newContact);
   } catch (error) {
     next(error);
@@ -66,7 +76,11 @@ export const updateContact = async (req, res, next) => {
         .status(400)
         .json({ message: "Body must have at least one field" });
     }
-    const updateContact = await Contact.findByIdAndUpdate(id, req.body);
+    const updateContact = await Contact.findOneAndUpdate(
+      { _id: id, owner: req.user._id },
+      req.body,
+      { new: true }
+    );
     if (!updateContact) {
       throw HttpError(404);
     }
@@ -87,8 +101,8 @@ export const updateStatusContact = async (req, res, next) => {
         .status(400)
         .json({ message: "Body must have at least one field" });
     }
-    const updatedContact = await Contact.findByIdAndUpdate(
-      id,
+    const updatedContact = await Contact.findOneAndUpdate(
+      { _id: id, owner: req.user._id },
       { favorite },
       { new: true }
     );
