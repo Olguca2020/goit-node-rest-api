@@ -28,7 +28,7 @@ export const uploadAvatar = multer({
   limits: {
     fieldSize: 2 * 1024 * 1024,
   },
-}).single("avatarURL");
+}).single("avatar");
 
 export const updateAvatar = async (req, res, next) => {
   try {
